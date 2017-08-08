@@ -102,6 +102,17 @@ public class VideoStreamingThread extends Thread {
         }
     }
 
+    public byte[] getCurrentFrame() {
+        synchronized(frameLock) {
+            while (this.frameBuffer == null) {
+                try {
+                    frameLock.wait();
+                } catch (InterruptedException e) {}
+            }
+            return this.frameBuffer;
+        }
+    }
+
     /**
      * @return all files within @imageDir
      */

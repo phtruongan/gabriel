@@ -9,31 +9,94 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="horizontal"
+        android:id="@+id/explore"
         android:weightSum="1" >
 
         <Space
             android:layout_width="10dp"
             android:layout_height="fill_parent"/>
-        
-        <ImageView
-            android:id="@+id/guidance_image"
-            android:layout_width="250dp"
-            android:layout_height="250dp" />
 
-        <VideoView
-            android:id="@+id/guidance_video"
-            android:layout_width="300dp"
-            android:layout_height="300dp" />
-
-        <Space
-            android:layout_width="10dp"
-            android:layout_height="fill_parent"/>
         
         <edu.cmu.cs.gabriel.CameraPreview
             android:id="@+id/camera_preview"
             android:layout_width="300dp"
             android:layout_height="300dp" />
-            
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="fill_parent"/>
+
+        <LinearLayout
+            android:layout_width="400dp"
+            android:layout_height="400dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/guidance_text"
+                android:layout_width="300dp"
+                android:layout_height="200dp"
+                android:textSize="32sp"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Annotation"
+                android:id="@+id/startAnnotationButton"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:id="@+id/annotate">
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="fill_parent"/>
+
+        <FrameLayout
+            android:layout_width="300dp"
+            android:layout_height="300dp">
+
+            <ImageView
+                android:id="@+id/annotate_image"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"/>
+
+            <edu.cmu.cs.gabriel.DrawingView
+                android:id="@+id/drawing_area"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"/>
+
+        </FrameLayout>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="fill_parent"/>
+
+        <LinearLayout
+            android:layout_width="400dp"
+            android:layout_height="400dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tmp_text"
+                android:layout_width="300dp"
+                android:layout_height="200dp"
+                android:textSize="32sp"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:id="@+id/exitAnnotationButton"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

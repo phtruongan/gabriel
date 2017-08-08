@@ -9,6 +9,7 @@ import java.util.TimerTask;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.media.AudioFormat;
@@ -28,8 +29,11 @@ import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import org.json.JSONException;
@@ -76,7 +80,12 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
     // views
     private ImageView imgView = null;
-    private VideoView videoView = null;
+    private TextView textView = null;
+    private LinearLayout exploreView = null;
+    private LinearLayout annotateView = null;
+    private Button startAnnotateButton = null;
+    private Button exitAnnotateButton = null;
+    private DrawingView drawingView = null;
 
     // audio
     private AudioRecord audioRecorder = null;
@@ -93,8 +102,36 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON+
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        imgView = (ImageView) findViewById(R.id.guidance_image);
-        videoView = (VideoView) findViewById(R.id.guidance_video);
+        exploreView = (LinearLayout) findViewById(R.id.explore);
+        annotateView = (LinearLayout) findViewById(R.id.annotate);
+        imgView = (ImageView) findViewById(R.id.annotate_image);
+        drawingView = (DrawingView) findViewById(R.id.drawing_area);
+
+        startAnnotateButton = (Button) findViewById(R.id.startAnnotationButton);
+        exitAnnotateButton = (Button) findViewById(R.id.exitAnnotationButton);
+
+        startAnnotateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                byte[] byteImage = videoStreamingThread.getCurrentFrame();
+                Bitmap bm = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
+                exploreView.setVisibility(view.GONE);
+                annotateView.setVisibility(view.VISIBLE);
+                imgView.setImageBitmap(bm);
+                pauseStream();
+            }
+        });
+
+        exitAnnotateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                annotateView.setVisibility(view.GONE);
+                exploreView.setVisibility(view.VISIBLE);
+                drawingView.saveDrawing();
+                drawingView.clearDrawing();
+                resumeStream();
+            }
+        });
     }
 
     @Override
@@ -491,28 +528,6 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                     }
                 }
             }
-            if (msg.what == NetworkProtocol.NETWORK_RET_IMAGE || msg.what == NetworkProtocol.NETWORK_RET_ANIMATION) {
-                Bitmap feedbackImg = (Bitmap) msg.obj;
-                imgView = (ImageView) findViewById(R.id.guidance_image);
-                videoView = (VideoView) findViewById(R.id.guidance_video);
-                imgView.setVisibility(View.VISIBLE);
-                videoView.setVisibility(View.GONE);
-                imgView.setImageBitmap(feedbackImg);
-            }
-            if (msg.what == NetworkProtocol.NETWORK_RET_VIDEO) {
-                String url = (String) msg.obj;
-                imgView.setVisibility(View.GONE);
-                videoView.setVisibility(View.VISIBLE);
-                videoView.setVideoURI(Uri.parse(url));
-                videoView.setMediaController(mediaController);
-                //Video Loop
-                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    public void onCompletion(MediaPlayer mp) {
-                        videoView.start();
-                    }
-                });
-                videoView.start();
-            }
             if (msg.what == NetworkProtocol.NETWORK_RET_DONE) {
                 notifyToken();
             }
@@ -581,6 +596,38 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
             stopAudioRecording();
         }
         stopResourceMonitoring();
+    }
+
+    private void pauseStream() {
+        Const.SENSOR_VIDEO = false;
+        if (preview != null) {
+            mCamera.setPreviewCallback(null);
+            preview.close();
+            reusedBuffer = null;
+            preview = null;
+            mCamera = null;
+        }
+        if (videoStreamingThread != null) {
+            videoStreamingThread.stopStreaming();
+            videoStreamingThread = null;
+        }
+    }
+
+    private void resumeStream() {
+        Const.SENSOR_VIDEO = true;
+        tokenController.reset();
+        if (preview == null) {
+            preview = (CameraPreview) findViewById(R.id.camera_preview);
+            mCamera = preview.checkCamera();
+            preview.start();
+            mCamera.setPreviewCallbackWithBuffer(previewCallback);
+            reusedBuffer = new byte[1920 * 1080 * 3 / 2]; // 1.5 bytes per pixel
+            mCamera.addCallbackBuffer(reusedBuffer);
+        }
+        if (videoStreamingThread == null) {
+            videoStreamingThread = new VideoStreamingThread(serverIP, Const.VIDEO_STREAM_PORT, returnMsgHandler, tokenController, mCamera);
+            videoStreamingThread.start();
+        }
     }
 
     /**************** SensorEventListener ***********************/
