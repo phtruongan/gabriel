@@ -60,6 +60,10 @@ public class VideoStreamingThread extends Thread {
     private byte[] frameBuffer = null;
     private Object frameLock = new Object();
 
+    // current frame
+    private boolean currentFrameRequest = false;
+    private byte[] currentFrame = null;
+
     private Handler networkHandler = null;
     private TokenController tokenController = null;
 
@@ -103,14 +107,7 @@ public class VideoStreamingThread extends Thread {
     }
 
     public byte[] getCurrentFrame() {
-        synchronized(frameLock) {
-            while (this.frameBuffer == null) {
-                try {
-                    frameLock.wait();
-                } catch (InterruptedException e) {}
-            }
-            return this.frameBuffer;
-        }
+        return this.currentFrame;
     }
 
     /**
@@ -181,6 +178,8 @@ public class VideoStreamingThread extends Thread {
                     }
                     data = this.frameBuffer;
                     dataTime = System.currentTimeMillis();
+
+                    currentFrame = data.clone();
 
                     if (Const.IS_EXPERIMENT) { // compress pre-loaded file in experiment mode
                         long tStartCompressing = System.currentTimeMillis();

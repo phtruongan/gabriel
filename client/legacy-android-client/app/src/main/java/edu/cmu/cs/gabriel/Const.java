@@ -14,8 +14,8 @@ public class Const {
 
     // high level sensor control (on/off)
     public static boolean SENSOR_VIDEO = true;
-    public static boolean SENSOR_ACC = true;
-    public static boolean SENSOR_AUDIO = true;
+    public static boolean SENSOR_ACC = false;
+    public static boolean SENSOR_AUDIO = false;
 
     /************************ In both demo and experiment mode *******************/
     // directory for all application related files (input + output)
@@ -32,6 +32,7 @@ public class Const {
     public static final int VIDEO_STREAM_PORT = 9098;
     public static final int ACC_STREAM_PORT = 9099;
     public static final int AUDIO_STREAM_PORT = 9100;
+    public static final int ANNOTATION_PORT = 9150;
     public static final int RESULT_RECEIVING_PORT = 9111;
     public static final int CONTROL_PORT = 22222;
 

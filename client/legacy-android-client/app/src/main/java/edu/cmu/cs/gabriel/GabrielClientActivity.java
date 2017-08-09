@@ -40,6 +40,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.cmu.cs.gabriel.network.AccStreamingThread;
+import edu.cmu.cs.gabriel.network.AnnotationStreamingThread;
 import edu.cmu.cs.gabriel.network.AudioStreamingThread;
 import edu.cmu.cs.gabriel.network.ControlThread;
 import edu.cmu.cs.gabriel.network.NetworkProtocol;
@@ -59,6 +60,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
     private VideoStreamingThread videoStreamingThread = null;
     private AccStreamingThread accStreamingThread = null;
     private AudioStreamingThread audioStreamingThread = null;
+    private AnnotationStreamingThread annotationStreamingThread = null;
     private ResultReceivingThread resultThread = null;
     private ControlThread controlThread = null;
     private TokenController tokenController = null;
@@ -105,6 +107,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
         exploreView = (LinearLayout) findViewById(R.id.explore);
         annotateView = (LinearLayout) findViewById(R.id.annotate);
         imgView = (ImageView) findViewById(R.id.annotate_image);
+        textView = (TextView) findViewById(R.id.guidance_text);
         drawingView = (DrawingView) findViewById(R.id.drawing_area);
 
         startAnnotateButton = (Button) findViewById(R.id.startAnnotationButton);
@@ -113,7 +116,9 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
         startAnnotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(LOG_TAG, "button (startAnnotation) clicked");
                 byte[] byteImage = videoStreamingThread.getCurrentFrame();
+                Log.d(LOG_TAG, "AAA");
                 Bitmap bm = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
                 exploreView.setVisibility(view.GONE);
                 annotateView.setVisibility(view.VISIBLE);
@@ -125,6 +130,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
         exitAnnotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(LOG_TAG, "button (exitAnnotation) clicked");
                 annotateView.setVisibility(view.GONE);
                 exploreView.setVisibility(view.VISIBLE);
                 drawingView.saveDrawing();
@@ -240,6 +246,10 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
             audioStreamingThread.stopStreaming();
             audioStreamingThread = null;
         }
+        if ((annotationStreamingThread != null) && (annotationStreamingThread.isAlive())) {
+            annotationStreamingThread.stopStreaming();
+            annotationStreamingThread = null;
+        }
         if ((resultThread != null) && (resultThread.isAlive())) {
             resultThread.close();
             resultThread = null;
@@ -304,6 +314,10 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
             audioStreamingThread = new AudioStreamingThread(serverIP, Const.AUDIO_STREAM_PORT, returnMsgHandler, tokenController);
             audioStreamingThread.start();
         }
+
+        annotationStreamingThread = new AnnotationStreamingThread(serverIP, Const.ANNOTATION_PORT, returnMsgHandler, tokenController);
+        annotationStreamingThread.start();
+        drawingView.setup(annotationStreamingThread);
     }
 
     /**
@@ -528,6 +542,10 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                     }
                 }
             }
+            if (msg.what == NetworkProtocol.NETWORK_RET_TEXT) {
+                String textFeedback = (String) msg.obj;
+                textView.setText(textFeedback);
+            }
             if (msg.what == NetworkProtocol.NETWORK_RET_DONE) {
                 notifyToken();
             }
@@ -566,6 +584,11 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
         if ((audioStreamingThread != null) && (audioStreamingThread.isAlive())) {
             audioStreamingThread.stopStreaming();
             audioStreamingThread = null;
+        }
+        if ((annotationStreamingThread != null) && (annotationStreamingThread.isAlive())) {
+            annotationStreamingThread.stopStreaming();
+            annotationStreamingThread = null;
+            drawingView.setup(null);
         }
         if ((controlThread != null) && (controlThread.isAlive())) {
             controlThread.close();

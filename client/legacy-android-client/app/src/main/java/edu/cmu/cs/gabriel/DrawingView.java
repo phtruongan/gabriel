@@ -11,13 +11,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 import android.media.ThumbnailUtils;
-import android.os.Environment;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import edu.cmu.cs.gabriel.network.AnnotationStreamingThread;
+
 public class DrawingView extends View {
+    private static final String LOG_TAG = "DrawingView";
 
     public int width;
     public  int height;
@@ -29,6 +30,8 @@ public class DrawingView extends View {
     private Paint circlePaint;
     private Path circlePath;
     private Paint mPaint;
+
+    private AnnotationStreamingThread annotationStreamingThread = null;
 
     public DrawingView(Context c, AttributeSet attr) {
         super(c, attr);
@@ -54,6 +57,10 @@ public class DrawingView extends View {
         circlePaint.setStrokeWidth(4f);
 
         setDrawingCacheEnabled(true);
+    }
+
+    public void setup(AnnotationStreamingThread annotationStreamingThread) {
+        this.annotationStreamingThread = annotationStreamingThread;
     }
 
     @Override
@@ -137,45 +144,32 @@ public class DrawingView extends View {
         setDrawingCacheEnabled(true);
     }
 
-    // TODO: Finish this function!
     public void saveDrawing()
     {
         Bitmap whatTheUserDrewBitmap = getDrawingCache();
         // don't forget to clear it (see above) or you just get duplicates
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                "/sdcard/DCIM/Camera/";
-        // almost always you will want to reduce res from the very high screen res
-        whatTheUserDrewBitmap =
-                ThumbnailUtils.extractThumbnail(whatTheUserDrewBitmap, 256, 256);
-        // NOTE that's an incredibly useful trick for cropping/resizing squares
-        // while handling all memory problems etc
+
+        // NOTE that's an incredibly useful trick for cropping/resizing squares while handling all memory problems etc
         // http://stackoverflow.com/a/17733530/294884
+        whatTheUserDrewBitmap = ThumbnailUtils.extractThumbnail(whatTheUserDrewBitmap, 256, 256);
 
         // you can now save the bitmap to a file, or display it in an ImageView:
         //ImageView testArea = ...
         //testArea.setImageBitmap( whatTheUserDrewBitmap );
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/req_images");
-        myDir.mkdirs();
-        String fname = "Image-00000.jpg";
-        File file = new File(myDir, fname);
-        if (file.exists())
-            file.delete();
+        File annotationImage = new File (Const.ROOT_DIR.getAbsolutePath() + File.separator + "sketch.jpg");
+        if (annotationImage.exists())
+            annotationImage.delete();
         try {
-            FileOutputStream out = new FileOutputStream(file);
+            FileOutputStream out = new FileOutputStream(annotationImage);
             whatTheUserDrewBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
         } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(null, "Error saving image!");
+            Log.e(LOG_TAG, "Error saving image: " + e.getMessage());
         }
-        // these days you often need a "byte array". for example,
-        // to save to parse.com or other cloud services
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        whatTheUserDrewBitmap.compress(Bitmap.CompressFormat.PNG, 0, baos);
-        byte[] yourByteArray;
-        yourByteArray = baos.toByteArray();
 
+        if (annotationStreamingThread != null) {
+            annotationStreamingThread.push(whatTheUserDrewBitmap);
+        }
     }
 }

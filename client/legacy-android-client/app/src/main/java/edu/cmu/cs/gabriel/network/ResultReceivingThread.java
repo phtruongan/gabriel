@@ -38,13 +38,6 @@ public class ResultReceivingThread extends Thread {
 
     private Handler returnMsgHandler;
 
-    // animation
-    private Timer timer = null;
-    private Bitmap[] animationFrames = new Bitmap[10];
-    private int[] animationPeriods = new int[10]; // how long each frame is shown, in millisecond
-    private int animationDisplayIdx = -1;
-    private int nAnimationFrames = -1;
-
 
     public ResultReceivingThread(String serverIP, int port, Handler returnMsgHandler) {
         isRunning = false;
@@ -165,49 +158,15 @@ public class ResultReceivingThread extends Thread {
             Bitmap imageFeedback = null;
 
 
-            // image guidance
+            // text guidance
             try {
-                String imageFeedbackString = resultJSON.getString("image");
-                byte[] data = Base64.decode(imageFeedbackString.getBytes(), Base64.DEFAULT);
-                imageFeedback = BitmapFactory.decodeByteArray(data,0,data.length);
-
+                String textFeedback = resultJSON.getString("text");
                 Message msg = Message.obtain();
-                msg.what = NetworkProtocol.NETWORK_RET_IMAGE;
-                msg.obj = imageFeedback;
+                msg.what = NetworkProtocol.NETWORK_RET_TEXT;
+                msg.obj = textFeedback;
                 this.returnMsgHandler.sendMessage(msg);
             } catch (JSONException e) {
-                Log.v(LOG_TAG, "no image guidance found");
-            }
-
-            // video guidance
-            try {
-                String videoURL = resultJSON.getString("video");
-                Message msg = Message.obtain();
-                msg.what = NetworkProtocol.NETWORK_RET_VIDEO;
-                msg.obj = videoURL;
-                this.returnMsgHandler.sendMessage(msg);
-            } catch (JSONException e) {
-                Log.v(LOG_TAG, "no video guidance found");
-            }
-
-            // animation guidance
-            try {
-                JSONArray animationArray = resultJSON.getJSONArray("animation");
-                nAnimationFrames = animationArray.length();
-                for (int i = 0; i < nAnimationFrames; i++) {
-                    JSONArray frameArray = animationArray.getJSONArray(i);
-                    String animationFrameString = frameArray.getString(0);
-                    byte[] data = Base64.decode(animationFrameString.getBytes(), Base64.DEFAULT);
-                    animationFrames[i] = BitmapFactory.decodeByteArray(data,0,data.length);
-                    animationPeriods[i] = frameArray.getInt(1);
-                }
-                animationDisplayIdx = -1;
-                if (timer == null) {
-                    timer = new Timer();
-                    timer.schedule(new animationTask(), 0);
-                }
-            } catch (JSONException e) {
-                Log.v(LOG_TAG, "no animation guidance found");
+                Log.v(LOG_TAG, "no text guidance found");
             }
 
             // speech guidance
@@ -230,27 +189,8 @@ public class ResultReceivingThread extends Thread {
         }
     }
 
-    private class animationTask extends TimerTask {
-        @Override
-        public void run() {
-            Log.v(LOG_TAG, "Running timer task");
-            animationDisplayIdx = (animationDisplayIdx + 1) % nAnimationFrames;
-            Message msg = Message.obtain();
-            msg.what = NetworkProtocol.NETWORK_RET_ANIMATION;
-            msg.obj = animationFrames[animationDisplayIdx];
-            returnMsgHandler.sendMessage(msg);
-            if (isRunning)
-                timer.schedule(new animationTask(), animationPeriods[animationDisplayIdx]);
-        }
-    };
-
     public void close() {
         this.isRunning = false;
-
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
 
         try {
             if(this.networkReader != null){
