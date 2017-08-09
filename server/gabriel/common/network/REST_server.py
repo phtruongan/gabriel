@@ -173,6 +173,8 @@ class GabrielInfo(Resource):
             gabriel.ServiceMeta.ACC_TCP_STREAMING_PORT: int(gabriel.Const.PUBLISH_SERVER_ACC_PORT),
             gabriel.ServiceMeta.AUDIO_TCP_STREAMING_IP: str(ip_addr),
             gabriel.ServiceMeta.AUDIO_TCP_STREAMING_PORT: int(gabriel.Const.PUBLISH_SERVER_AUDIO_PORT),
+            gabriel.ServiceMeta.ANNOTATION_TCP_STREAMING_IP: str(ip_addr),
+            gabriel.ServiceMeta.ANNOTATION_TCP_STREAMING_PORT: int(gabriel.Const.PUBLISH_SERVER_ANNOTATION_PORT),
             gabriel.ServiceMeta.UCOMM_RELAY_IP: str(ip_addr),
             gabriel.ServiceMeta.UCOMM_RELAY_PORT: int(gabriel.Const.UCOMM_COMMUNICATE_PORT),
             }

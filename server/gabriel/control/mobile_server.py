@@ -40,6 +40,7 @@ image_queue_list = list()
 acc_queue_list = list()
 audio_queue_list = list()
 gps_queue_list = list()
+annotation_queue_list = list()
 # a global queue that contains final messages sent back to the client
 result_queue = multiprocessing.Queue()
 # a global queue that contains control messages to be sent to the client
@@ -284,6 +285,32 @@ class MobileAudioHandler(MobileSensorHandler):
                     pass
             try:
                 audio_queue.put((header_data, audio_data))
+            except Queue.Full as e:
+                pass
+
+
+class MobileAnnotationHandler(MobileSensorHandler):
+    def setup(self):
+        super(MobileAnnotationHandler, self).setup()
+
+    def __repr__(self):
+        return "Mobile Annotation Server"
+
+    def _handle_input_data(self):
+        header_size = struct.unpack("!I", self._recv_all(4))[0]
+        header_data = self._recv_all(header_size)
+        annotation_size = struct.unpack("!I", self._recv_all(4))[0]
+        annotation_data = self._recv_all(annotation_size)
+
+        ## put current annotation data in all registered cognitive engine queue
+        for annotation_queue in annotation_queue_list:
+            if annotation_queue.full():
+                try:
+                    annotation_queue.get_nowait()
+                except Queue.Empty as e:
+                    pass
+            try:
+                annotation_queue.put_nowait((header_data, annotation_data))
             except Queue.Full as e:
                 pass
 

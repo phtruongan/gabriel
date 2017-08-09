@@ -35,6 +35,7 @@ class Protocol_sensor(object):
     JSON_VALUE_SENSOR_TYPE_ACC = "acc"
     JSON_VALUE_SENSOR_TYPE_GPS = "gps"
     JSON_VALUE_SENSOR_TYPE_AUDIO = "audio"
+    JSON_VALUE_SENSOR_TYPE_ANNOTATION = "annotation"
 
 
 class Protocol_measurement(object):

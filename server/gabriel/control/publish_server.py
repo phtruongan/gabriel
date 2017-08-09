@@ -147,6 +147,40 @@ class AudioPublishHandler(SensorPublishHandler):
         super(AudioPublishHandler, self).terminate()
 
 
+class AnnotationPublishHandler(SensorPublishHandler):
+    def setup(self):
+        super(AnnotationPublishHandler, self).setup()
+        self.data_queue = multiprocessing.Queue(gabriel.Const.MAX_FRAME_SIZE)
+        gabriel.control.annotation_queue_list.append(self.data_queue)
+
+    def __repr__(self):
+        return "Annotation Publish Server"
+
+    def handle(self):
+        LOG.info("New offloading engine connected to annotation stream")
+        super(AnnotationPublishHandler, self).handle()
+
+    def _handle_queue_data(self):
+        try:
+            (header_data, annotation_data) = self.data_queue.get(timeout = 0.0001)
+
+            header_json = json.loads(header_data)
+            header_json.update({gabriel.Protocol_sensor.JSON_KEY_SENSOR_TYPE : gabriel.Protocol_sensor.JSON_VALUE_SENSOR_TYPE_ANNOTATION})
+            header_data = json.dumps(header_json)
+
+            packet = struct.pack("!II%ds%ds" % (len(header_data), len(annotation_data)),
+                    len(header_data), len(annotation_data), header_data, annotation_data)
+            self.request.send(packet)
+            self.wfile.flush()
+        except Queue.Empty as e:
+            pass
+
+    def terminate(self):
+        LOG.info("Offloading engine disconnected from annotation stream")
+        gabriel.control.annotation_queue_list.remove(self.data_queue)
+        super(AnnotationPublishHandler, self).terminate()
+
+
 class SensorPublishServer(gabriel.network.CommonServer):
     def __init__(self, port, handler):
         gabriel.network.CommonServer.__init__(self, port, handler) # cannot use super because it's old style class
