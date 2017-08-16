@@ -157,16 +157,29 @@ public class ResultReceivingThread extends Thread {
             String speechFeedback = "";
             Bitmap imageFeedback = null;
 
+            // image guidance
+            try {
+                String imageFeedbackString = resultJSON.getString("annotated_img");
+                byte[] data = Base64.decode(imageFeedbackString.getBytes(), Base64.DEFAULT);
+                imageFeedback = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+                Message msg = Message.obtain();
+                msg.what = NetworkProtocol.NETWORK_RET_IMAGE;
+                msg.obj = imageFeedback;
+                this.returnMsgHandler.sendMessage(msg);
+            } catch (JSONException e) {
+                Log.v(LOG_TAG, "no image annotation found");
+            }
 
             // text guidance
             try {
-                String textFeedback = resultJSON.getString("text");
+                String textFeedback = resultJSON.getString("annotated_text");
                 Message msg = Message.obtain();
                 msg.what = NetworkProtocol.NETWORK_RET_TEXT;
                 msg.obj = textFeedback;
-                this.returnMsgHandler.sendMessage(msg);
+                //this.returnMsgHandler.sendMessage(msg);
             } catch (JSONException e) {
-                Log.v(LOG_TAG, "no text guidance found");
+                Log.v(LOG_TAG, "no text annotation found");
             }
 
             // speech guidance

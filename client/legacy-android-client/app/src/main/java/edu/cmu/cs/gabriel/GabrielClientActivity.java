@@ -81,8 +81,9 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
     private ReceivedPacketInfo receivedPacketInfo = null;
 
     // views
-    private ImageView imgView = null;
-    private TextView textView = null;
+    private ImageView capturedImgView = null;
+    private TextView annotatedTextView = null;
+    private ImageView annotatedImageView = null;
     private LinearLayout exploreView = null;
     private LinearLayout annotateView = null;
     private Button startAnnotateButton = null;
@@ -109,8 +110,9 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
         exploreView = (LinearLayout) findViewById(R.id.explore);
         annotateView = (LinearLayout) findViewById(R.id.annotate);
-        imgView = (ImageView) findViewById(R.id.annotate_image);
-        textView = (TextView) findViewById(R.id.guidance_text);
+        capturedImgView = (ImageView) findViewById(R.id.annotate_image);
+        annotatedTextView = (TextView) findViewById(R.id.annotated_text);
+        annotatedImageView = (ImageView) findViewById(R.id.annotated_image);
         drawingView = (DrawingView) findViewById(R.id.drawing_area);
 
         startAnnotateButton = (Button) findViewById(R.id.startAnnotationButton);
@@ -124,7 +126,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                 currentCapturedBm = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
                 exploreView.setVisibility(view.GONE);
                 annotateView.setVisibility(view.VISIBLE);
-                imgView.setImageBitmap(currentCapturedBm);
+                capturedImgView.setImageBitmap(currentCapturedBm);
                 pauseStream();
             }
         });
@@ -523,7 +525,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
             if (msg.what == NetworkProtocol.NETWORK_RET_SPEECH) {
                 String ttsMessage = (String) msg.obj;
 
-                if (tts != null){
+                if (tts != null) {
                     Log.d(LOG_TAG, "tts to be played: " + ttsMessage);
                     // TODO: check if tts is playing something else
                     tts.setSpeechRate(1.0f);
@@ -537,16 +539,20 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                         tts.speak(splitMSGs[0].toString().trim(), TextToSpeech.QUEUE_FLUSH, null); // the first sentence
                         for (int i = 1; i < splitMSGs.length - 1; i++) {
                             tts.playSilence(350, TextToSpeech.QUEUE_ADD, null); // add pause for every period
-                            tts.speak(splitMSGs[i].toString().trim(),TextToSpeech.QUEUE_ADD, null);
+                            tts.speak(splitMSGs[i].toString().trim(), TextToSpeech.QUEUE_ADD, null);
                         }
                         tts.playSilence(350, TextToSpeech.QUEUE_ADD, null);
-                        tts.speak(splitMSGs[splitMSGs.length - 1].toString().trim(),TextToSpeech.QUEUE_ADD, map); // the last sentence
+                        tts.speak(splitMSGs[splitMSGs.length - 1].toString().trim(), TextToSpeech.QUEUE_ADD, map); // the last sentence
                     }
                 }
             }
             if (msg.what == NetworkProtocol.NETWORK_RET_TEXT) {
                 String textFeedback = (String) msg.obj;
-                textView.setText(textFeedback);
+                annotatedTextView.setText(textFeedback);
+            }
+            if (msg.what == NetworkProtocol.NETWORK_RET_IMAGE) {
+                Bitmap feedbackImg = (Bitmap) msg.obj;
+                annotatedImageView.setImageBitmap(feedbackImg);
             }
             if (msg.what == NetworkProtocol.NETWORK_RET_DONE) {
                 notifyToken();
