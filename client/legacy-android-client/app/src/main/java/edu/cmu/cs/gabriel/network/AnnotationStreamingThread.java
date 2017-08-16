@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -13,6 +14,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import edu.cmu.cs.gabriel.token.TokenController;
@@ -30,7 +33,7 @@ public class AnnotationStreamingThread extends Thread {
 //    private DataInputStream networkReader = null;
 
     // The annotation data
-    private Vector<Bitmap> bmList = new Vector<Bitmap>();
+    private List<Pair<Bitmap, Bitmap>> annotationList = new ArrayList<Pair<Bitmap, Bitmap>>();
 
     private Handler networkHander = null;
     private TokenController tokenController = null;
@@ -71,22 +74,24 @@ public class AnnotationStreamingThread extends Thread {
 
         while (this.isRunning) {
             try {
-                if (this.bmList.size() == 0){
-
-
-
+                if (this.annotationList.size() == 0){
                     try {
                         Thread.sleep(10); // 10 millisecond
                     } catch (InterruptedException e) {}
                     continue;
                 }
 
+                Pair<Bitmap, Bitmap> pair = this.annotationList.remove(0);
+                Bitmap capturedBm = pair.first;
+                Bitmap drawnBm = pair.second;
+
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                capturedBm.compress(Bitmap.CompressFormat.JPEG, 67, baos);
+                int capturedSize = baos.size();
+                drawnBm.compress(Bitmap.CompressFormat.PNG, 0, baos);
 
-                Bitmap bm = this.bmList.remove(0);
-                bm.compress(Bitmap.CompressFormat.PNG, 0, baos);
-
-                byte[] header = ("{\"" + NetworkProtocol.HEADER_MESSAGE_FRAME_ID + "\":" + this.frameID + "}").getBytes();
+                byte[] header = ("{\"" + NetworkProtocol.HEADER_MESSAGE_FRAME_ID + "\":" + this.frameID +
+                        ", \"image_size\":" + capturedSize + "}").getBytes();
                 byte[] data = baos.toByteArray();
                 networkWriter.writeInt(header.length);
                 networkWriter.write(header);
@@ -119,8 +124,8 @@ public class AnnotationStreamingThread extends Thread {
         }
     }
 
-    public void push(Bitmap bm) {
-        this.bmList.add(bm);
+    public void push(Bitmap capturedBm, Bitmap drawnBm) {
+        this.annotationList.add(new Pair(capturedBm, drawnBm));
     }
 
     /**

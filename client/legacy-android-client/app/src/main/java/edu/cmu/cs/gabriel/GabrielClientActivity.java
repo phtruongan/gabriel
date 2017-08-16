@@ -95,6 +95,9 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
     private boolean isAudioRecording = false;
     private int audioBufferSize = -1;
 
+    // annotation
+    private Bitmap currentCapturedBm = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.v(LOG_TAG, "++onCreate");
@@ -118,11 +121,10 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
             public void onClick(View view) {
                 Log.d(LOG_TAG, "button (startAnnotation) clicked");
                 byte[] byteImage = videoStreamingThread.getCurrentFrame();
-                Log.d(LOG_TAG, "AAA");
-                Bitmap bm = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
+                currentCapturedBm = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
                 exploreView.setVisibility(view.GONE);
                 annotateView.setVisibility(view.VISIBLE);
-                imgView.setImageBitmap(bm);
+                imgView.setImageBitmap(currentCapturedBm);
                 pauseStream();
             }
         });
@@ -133,7 +135,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                 Log.d(LOG_TAG, "button (exitAnnotation) clicked");
                 annotateView.setVisibility(view.GONE);
                 exploreView.setVisibility(view.VISIBLE);
-                drawingView.saveDrawing();
+                drawingView.saveDrawing(currentCapturedBm);
                 drawingView.clearDrawing();
                 resumeStream();
             }

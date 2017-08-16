@@ -144,7 +144,7 @@ public class DrawingView extends View {
         setDrawingCacheEnabled(true);
     }
 
-    public void saveDrawing()
+    public void saveDrawing(Bitmap whatTheUserSeeBitmap)
     {
         Bitmap whatTheUserDrewBitmap = getDrawingCache();
         // don't forget to clear it (see above) or you just get duplicates
@@ -169,7 +169,7 @@ public class DrawingView extends View {
         }
 
         if (annotationStreamingThread != null) {
-            annotationStreamingThread.push(whatTheUserDrewBitmap);
+            annotationStreamingThread.push(whatTheUserSeeBitmap, whatTheUserDrewBitmap);
         }
     }
 }
