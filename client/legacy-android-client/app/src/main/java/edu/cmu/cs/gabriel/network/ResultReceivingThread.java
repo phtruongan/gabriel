@@ -162,6 +162,7 @@ public class ResultReceivingThread extends Thread {
                 String imageFeedbackString = resultJSON.getString("annotated_img");
                 byte[] data = Base64.decode(imageFeedbackString.getBytes(), Base64.DEFAULT);
                 imageFeedback = BitmapFactory.decodeByteArray(data, 0, data.length);
+                //Log.e(LOG_TAG, "" + imageFeedback.getHeight() + "," + imageFeedback.getWidth());
 
                 Message msg = Message.obtain();
                 msg.what = NetworkProtocol.NETWORK_RET_IMAGE;

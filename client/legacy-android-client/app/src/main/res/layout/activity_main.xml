@@ -4,7 +4,8 @@
     android:layout_height="fill_parent"
     android:keepScreenOn="true"
     android:orientation="vertical" >
-    
+
+    <!-- viewing mode -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -19,23 +20,23 @@
         
         <edu.cmu.cs.gabriel.CameraPreview
             android:id="@+id/camera_preview"
-            android:layout_width="300dp"
-            android:layout_height="300dp" />
+            android:layout_width="320dp"
+            android:layout_height="240dp" />
 
         <Space
             android:layout_width="20dp"
             android:layout_height="fill_parent"/>
 
         <LinearLayout
-            android:layout_width="400dp"
-            android:layout_height="400dp"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
             android:orientation="vertical">
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/annotated_text"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"/>
+                android:textSize="24sp"/>-->
 
             <ImageView
                 android:id="@+id/annotated_image"
@@ -52,6 +53,7 @@
 
     </LinearLayout>
 
+    <!-- annotation mode -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -64,8 +66,8 @@
             android:layout_height="fill_parent"/>
 
         <FrameLayout
-            android:layout_width="300dp"
-            android:layout_height="300dp">
+            android:layout_width="520dp"
+            android:layout_height="390dp">
 
             <ImageView
                 android:id="@+id/annotate_image"
@@ -78,10 +80,6 @@
                 android:layout_height="fill_parent"/>
 
         </FrameLayout>
-
-        <Space
-            android:layout_width="20dp"
-            android:layout_height="fill_parent"/>
 
         <LinearLayout
             android:layout_width="400dp"
@@ -97,7 +95,7 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Back"
+                android:text="Save"
                 android:id="@+id/exitAnnotationButton"/>
 
         </LinearLayout>

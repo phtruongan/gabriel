@@ -111,7 +111,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
         exploreView = (LinearLayout) findViewById(R.id.explore);
         annotateView = (LinearLayout) findViewById(R.id.annotate);
         capturedImgView = (ImageView) findViewById(R.id.annotate_image);
-        annotatedTextView = (TextView) findViewById(R.id.annotated_text);
+        //annotatedTextView = (TextView) findViewById(R.id.annotated_text);
         annotatedImageView = (ImageView) findViewById(R.id.annotated_image);
         drawingView = (DrawingView) findViewById(R.id.drawing_area);
 
@@ -383,6 +383,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
                     videoStreamingThread.push(frame, parameters);
                 }
             }
+            mCamera.addCallbackBuffer(frame);
         }
     };
 
@@ -548,7 +549,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
             }
             if (msg.what == NetworkProtocol.NETWORK_RET_TEXT) {
                 String textFeedback = (String) msg.obj;
-                annotatedTextView.setText(textFeedback);
+                //annotatedTextView.setText(textFeedback);
             }
             if (msg.what == NetworkProtocol.NETWORK_RET_IMAGE) {
                 Bitmap feedbackImg = (Bitmap) msg.obj;
