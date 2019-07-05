@@ -111,7 +111,11 @@ class CognitiveProcessThread(threading.Thread):
             ## put return data into output queue
             rtn_json = header
             rtn_json[gabriel.Protocol_client.JSON_KEY_ENGINE_ID] = self.engine_id
+            print "investigates"
+            print header
+            print self.engine_id
             if gabriel.Debug.TIME_MEASUREMENT:
+                print "Jump into"
                 rtn_json[gabriel.Protocol_measurement.JSON_KEY_APP_SENT_TIME] = time.time()
             self.output_queue.put( (json.dumps(rtn_json), result) )
             print "Done put"
