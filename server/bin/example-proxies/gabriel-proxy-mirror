@@ -69,6 +69,7 @@ class DummyVideoApp(gabriel.proxy.CognitiveProcessThread):
         LOG.info("%s\n" % header)
         np_data=np.fromstring(data, dtype=np.uint8)
         bgr_img=cv2.imdecode(np_data,cv2.IMREAD_COLOR)
+        print bgr_img.shape
         mirror_img=cv2.flip(bgr_img,1)
         _, jpeg_img=cv2.imencode('.jpg', mirror_img)
 
