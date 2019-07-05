@@ -115,6 +115,7 @@ class CognitiveProcessThread(threading.Thread):
                 rtn_json[gabriel.Protocol_measurement.JSON_KEY_APP_SENT_TIME] = time.time()
             self.output_queue.put( (json.dumps(rtn_json), result) )
             print "Done put"
+        print "LOL OUT"
         LOG.info("[TERMINATE] Finish %s" % str(self))
 
     def handle(self, header, data): # header is in JSON format
