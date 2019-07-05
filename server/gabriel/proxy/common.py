@@ -224,6 +224,10 @@ class DataPublishHandler(gabriel.network.CommonHandler):
             header_str = json.dumps(header)
 
             # send data
+            print "Another"
+            print len(header_str)
+            print len(data)
+     
             packet = struct.pack("!II%ds%ds" % (len(header_str), len(data)), len(header_str), len(data), header_str, data)
             self.request.send(packet)
             self.wfile.flush()
