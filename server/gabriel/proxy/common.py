@@ -91,7 +91,8 @@ class CognitiveProcessThread(threading.Thread):
         return "Cognitive Processing Thread"
 
     def run(self):
-        while(not self.stop.wait(0.0001)):
+        #while(not self.stop.wait(0.0001)):
+        while True:
             try:
                 (header, data) = self.data_queue.get(timeout = 0.0001)
                 if header is None or data is None:
