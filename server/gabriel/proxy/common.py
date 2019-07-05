@@ -103,7 +103,6 @@ class CognitiveProcessThread(threading.Thread):
             ## the real processing
             # header can be changed directly in the proxy (design choice made for backward compatibility)
             result = self.handle(header, data) # header is in JSON format
-            print result
             print "Holo"
             if result is None: # A special return that marks the result useless
                 continue
