@@ -116,6 +116,8 @@ class DummyVideoApp(gabriel.proxy.CognitiveProcessThread):
                 return rtn_data
         else:
             # python client can only handle image data
+            print "Not use ANROID"
+            print mirror_img.shape
             return jpeg_img.tostring()
 
 
