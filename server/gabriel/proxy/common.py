@@ -103,15 +103,18 @@ class CognitiveProcessThread(threading.Thread):
             ## the real processing
             # header can be changed directly in the proxy (design choice made for backward compatibility)
             result = self.handle(header, data) # header is in JSON format
+            print result
+            print "Holo"
             if result is None: # A special return that marks the result useless
                 continue
-
+            print "Hala"
             ## put return data into output queue
             rtn_json = header
             rtn_json[gabriel.Protocol_client.JSON_KEY_ENGINE_ID] = self.engine_id
             if gabriel.Debug.TIME_MEASUREMENT:
                 rtn_json[gabriel.Protocol_measurement.JSON_KEY_APP_SENT_TIME] = time.time()
             self.output_queue.put( (json.dumps(rtn_json), result) )
+            print "Done put"
         LOG.info("[TERMINATE] Finish %s" % str(self))
 
     def handle(self, header, data): # header is in JSON format
